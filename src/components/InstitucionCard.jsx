@@ -5,21 +5,21 @@ export function InstitucionCard({ institucion }) {
 
   return (
     <div className="bg-[#1a252f] rounded-lg shadow-lg text-white flex flex-col items-center p-8 max-w-[400px] w-full mx-auto transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
-      {institucion.institucion_logo ? (
-        <img
-          src={institucion.institucion_logo}
-          alt={`${institucion.institucion_nombre} logo`}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "https://via.placeholder.com/100";
-          }}
-          className="h-24 w-24 rounded-full object-cover mb-4 border-2 border-blue-500"
-        />
-      ) : (
-        <div className="h-24 w-24 rounded-full bg-gray-600 flex items-center justify-center mb-4 border-2 border-blue-500">
-          <span className="text-xs text-white text-center">Imagen no agregada</span>
-        </div>
-      )}
+      <div className="h-24 w-24 rounded-full bg-[#ffffff] flex items-center justify-center mb-4 border-2 border-blue-500">
+        {institucion.institucion_logo ? (
+          <img
+            src={institucion.institucion_logo}
+            alt={`${institucion.institucion_nombre} logo`}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/100";
+            }}
+            className="h-24 w-24 rounded-full object-cover"
+          />
+        ) : (
+          <span className="text-xs text-black text-center">Imagen no agregada</span>
+        )}
+      </div>
       <div className="flex flex-col items-center mb-4">
         <h1 className="text-xl font-bold mb-1 text-center">
           {institucion.institucion_nombre}
@@ -37,5 +37,3 @@ export function InstitucionCard({ institucion }) {
     </div>
   );
 }
-
-

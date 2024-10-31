@@ -1,3 +1,5 @@
+// src/pages/MenuPrincipal.js
+
 import React, { useState } from "react";
 import { Footer } from "../components/footer";
 import { Sidebar } from "../components/Sidebar";
@@ -5,10 +7,11 @@ import { FaSchool, FaRoute, FaUserGraduate } from "react-icons/fa";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { useAuth } from "../components/AuthContext"; // Importamos el contexto de autenticación
 
 export function MenuPrincipal() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const userName = "Usuario"; // Placeholder para el nombre del usuario registrado
+    const { user } = useAuth(); // Obtenemos la información del usuario desde el contexto
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -27,6 +30,9 @@ export function MenuPrincipal() {
 
     // Ancho del Sidebar en píxeles
     const sidebarWidth = isSidebarOpen ? 256 : 64; // 256px para w-64, 64px para w-16
+
+    // Obtenemos el nombre del usuario, y si no está disponible, usamos 'Usuario'
+    const userName = user ? user.username : "Usuario";
 
     return (
         <div className="relative min-h-screen w-full overflow-x-hidden">
@@ -96,14 +102,13 @@ export function MenuPrincipal() {
                                 </a>
                             </div>
 
-                            {/* Entidades Reguladoras (Título eliminado) */}
+                            {/* Entidades Reguladoras */}
                             <div
                                 className="mt-12 md:mt-16 lg:mt-20 bg-white bg-opacity-90 p-4 md:p-6 rounded-2xl w-full max-w-xl mx-auto shadow-lg"
                                 style={{ minHeight: "200px" }}
                             >
-                                {/* Slider sin título */}
+                                {/* Slider */}
                                 <Slider {...sliderSettings} className="w-full h-full">
-                                    {/* Ajustes en las imágenes para mejor visualización */}
                                     {/* Slide 1 */}
                                     <div className="flex items-center justify-center h-full">
                                         <img
@@ -147,3 +152,4 @@ export function MenuPrincipal() {
     );
 }
 
+export default MenuPrincipal;

@@ -1,10 +1,14 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export function Navigation() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
-    navigate(-1); // Navega a la página anterior en el historial
+    // Verificar si la ruta anterior en el historial es la página principal ("/")
+    if (location.pathname !== "/") {
+      navigate(-1); // Navega a la página anterior en el historial solo si no es "/"
+    }
   };
 
   return (
@@ -17,7 +21,7 @@ export function Navigation() {
           Atrás
         </button>
         <Link 
-          to="/instituciones" 
+          to="/menu-principal" 
           className="text-white font-extrabold text-2xl md:text-3xl hover:text-gray-200 transition-colors duration-300 text-center"
         >
           Instituciones

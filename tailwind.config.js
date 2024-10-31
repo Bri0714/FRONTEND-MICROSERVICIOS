@@ -4,25 +4,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",],
   theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-
-// tailwind.config.js
-// tailwind.config.js
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html",
-  ],
-  theme: {
     extend: {
       backgroundSize: {
         '400': '400% 400%',
       },
       animation: {
         gradient: 'gradient 15s ease infinite',
+        'slide-car': 'slideCar 10s linear infinite',
       },
       keyframes: {
         gradient: {
@@ -32,6 +20,11 @@ module.exports = {
           '50%': {
             'background-position': '100% 50%',
           },
+        },
+        slideCar: {
+          '0%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(50%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
       },
       backgroundImage: {
