@@ -9,6 +9,8 @@ import { AdministracionColegios } from "./pages/AdministracionInstitucion";
 import { MenuPrincipal } from "./pages/MenuPrincipal";
 import { IndexPage } from "./pages/index";
 import { Perfil } from "./pages/Perfil";
+import { InstitucionDetail } from "./pages/InstitucionDetail";
+import { InstitucionEstudiantesDetail } from "./pages/InstitucionEstudiantesDetail";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import axios from "axios"; // Agregar la importación de axios
 
@@ -120,6 +122,17 @@ function App() {
                             </PrivateRoute>
                         }
                     />
+                    <Route
+                    path="/instituciones/:id/detalles"
+                    element={
+                        <PrivateRoute>
+                            <WithNavigation>
+                                <InstitucionDetail />
+                            </WithNavigation>
+                        </PrivateRoute>
+                    }
+                    />
+
                     <Route
                         path="/instituciones-create"
                         element={

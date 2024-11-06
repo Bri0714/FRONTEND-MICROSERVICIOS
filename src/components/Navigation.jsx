@@ -1,3 +1,6 @@
+// src/components/Navigation.js
+
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export function Navigation() {
@@ -5,10 +8,41 @@ export function Navigation() {
   const location = useLocation();
 
   const handleBack = () => {
-    // Verificar si la ruta anterior en el historial es la página principal ("/")
-    if (location.pathname !== "/") {
-      navigate(-1); // Navega a la página anterior en el historial solo si no es "/"
+    if (location.pathname !== "/menu-principal" && location.pathname !== "/") {
+      navigate(-1);
     }
+  };
+
+  // Mapeo de rutas a títulos y botones
+  const routeInfo = {
+    "/menu-principal": {
+      title: "Instituciones",
+      createText: "Crear Institución",
+      createLink: "/instituciones-create",
+    },
+    "/instituciones": {
+      title: "Colegios",
+      createText: "Crear Colegio",
+      createLink: "/instituciones-create",
+    },
+    "/rutas": {
+      title: "Rutas",
+      createText: "Crear Ruta",
+      createLink: "/rutas-create",
+    },
+    "/estudiantes": {
+      title: "Estudiantes",
+      createText: "Crear Estudiante",
+      createLink: "/estudiantes-create",
+    },
+    // Agrega más rutas si es necesario
+  };
+
+  const currentPath = location.pathname;
+  const { title, createText, createLink } = routeInfo[currentPath] || {
+    title: "Colegios",
+    createText: "Crear Colegio",
+    createLink: "/instituciones-create",
   };
 
   return (
@@ -24,14 +58,17 @@ export function Navigation() {
           to="/menu-principal" 
           className="text-white font-extrabold text-2xl md:text-3xl hover:text-gray-200 transition-colors duration-300 text-center"
         >
-          Instituciones
+          {title}
         </Link>
-        <Link to="/instituciones-create">
+        <Link to={createLink}>
           <button className="bg-blue-700 text-white font-bold p-2 rounded-lg transition-all duration-500 ease-in-out transform hover:bg-blue-600 hover:-translate-y-1 hover:scale-105">
-            Crear Institución
+            {createText}
           </button>
         </Link>
       </div>
     </nav>
   );
 }
+
+export default Navigation;
+
