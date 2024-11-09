@@ -1,16 +1,37 @@
-import { useEffect } from "react";
+// src/pages/InstitucionFormPage.jsx
+
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { createInstitucion, getInstitucion, updateInstitucion } from "../api/instituciones.api";
+import {
+  createInstitucion,
+  getInstitucion,
+  updateInstitucion,
+} from "../api/instituciones.api";
 import { toast } from "react-hot-toast";
 import { Footer } from "../components/footer";
 
 export function InstitucionFormPage() {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm();
   const navigate = useNavigate();
   const params = useParams();
+  const [showTerminos, setShowTerminos] = useState(false);
+  const aceptaTerminos = watch("acepta_terminos", false);
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!data.acepta_terminos) {
+      toast.error(
+        "Debe aceptar los términos y condiciones para continuar.",
+        { position: "bottom-right" }
+      );
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("institucion_nombre", data.institucion_nombre);
@@ -18,20 +39,26 @@ export function InstitucionFormPage() {
       formData.append("institucion_nit", data.institucion_nit);
       formData.append("institucion_contactos", data.institucion_contactos);
       formData.append("institucion_telefono", data.institucion_telefono);
-      if (data.institucion_logo[0]) {
+      if (data.institucion_logo && data.institucion_logo[0]) {
         formData.append("institucion_logo", data.institucion_logo[0]);
       }
 
       if (params.id) {
         await updateInstitucion(params.id, formData);
-        toast.success("Institución actualizada", { position: "bottom-right" });
+        toast.success("Institución actualizada", {
+          position: "bottom-right",
+        });
       } else {
         await createInstitucion(formData);
-        toast.success("Nueva Institución creada", { position: "bottom-right" });
+        toast.success("Nueva Institución creada", {
+          position: "bottom-right",
+        });
       }
       navigate("/instituciones");
     } catch (error) {
-      toast.error("Error al crear/actualizar la Institución", { position: "bottom-right" });
+      toast.error("Error al crear/actualizar la Institución", {
+        position: "bottom-right",
+      });
     }
   });
 
@@ -69,7 +96,7 @@ export function InstitucionFormPage() {
                 Nombre
               </label>
               <input
-                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-black leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 id="nombre"
                 type="text"
                 placeholder="Nombre"
@@ -89,7 +116,7 @@ export function InstitucionFormPage() {
                 NIT
               </label>
               <input
-                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-black leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 id="nit"
                 type="text"
                 placeholder="NIT"
@@ -112,7 +139,7 @@ export function InstitucionFormPage() {
                 Dirección
               </label>
               <input
-                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-black leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 id="direccion"
                 type="text"
                 placeholder="Dirección"
@@ -132,7 +159,7 @@ export function InstitucionFormPage() {
                 Teléfono
               </label>
               <input
-                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-black leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 id="telefono"
                 type="tel"
                 placeholder="Teléfono"
@@ -154,7 +181,7 @@ export function InstitucionFormPage() {
               Correo Electrónico
             </label>
             <input
-              className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="shadow-md appearance-none border rounded-lg w-full py-2 px-3 text-black leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               id="correo"
               type="email"
               placeholder="Correo Electrónico"
@@ -222,8 +249,59 @@ export function InstitucionFormPage() {
             )}
           </div>
 
+          {/* Campo de Términos y Condiciones */}
+          <div className="mb-4 px-2">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="acepta_terminos"
+                  type="checkbox"
+                  {...register("acepta_terminos", { required: true })}
+                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-2 text-sm w-full">
+                <label
+                  htmlFor="acepta_terminos"
+                  className="font-medium text-white"
+                >
+                  Acepto los{" "}
+                  <span
+                    className="text-blue-400 underline cursor-pointer"
+                    onClick={() => setShowTerminos(!showTerminos)}
+                  >
+                    términos y condiciones
+                  </span>
+                </label>
+                {showTerminos && (
+                  <div className="mt-2 bg-gray-700 p-3 rounded-lg">
+                    <p className="text-gray-300">
+                      Declaro que la información proporcionada es verídica y que
+                      no infringe derechos de autor de terceros. Estoy consciente
+                      de las leyes vigentes en Bogotá, Colombia, que prohíben el
+                      uso no autorizado de imágenes, fotos o logos de terceros.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            {errors.acepta_terminos && (
+              <span className="text-red-500 text-sm">
+                Debe aceptar los términos y condiciones para continuar.
+              </span>
+            )}
+          </div>
+
           <div className="px-2">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+            <button
+              type="submit"
+              disabled={!aceptaTerminos}
+              className={`${aceptaTerminos
+                  ? "bg-blue-500 hover:bg-blue-700"
+                  : "bg-gray-500 cursor-not-allowed"
+                } text-white font-bold py-2 px-4 rounded-lg w-full transition-all duration-300 ease-in-out transform ${aceptaTerminos ? "hover:-translate-y-1 hover:scale-105" : ""
+                } focus:outline-none focus:ring-4 focus:ring-blue-300`}
+            >
               Guardar
             </button>
           </div>
@@ -234,3 +312,4 @@ export function InstitucionFormPage() {
   );
 }
 
+export default InstitucionFormPage;

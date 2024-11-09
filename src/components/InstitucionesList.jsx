@@ -1,3 +1,5 @@
+// src/components/InstitucionesList.jsx
+
 import React, { useEffect, useState } from "react";
 import { getAllInstituciones } from "../api/instituciones.api";
 import { InstitucionCard } from "./InstitucionCard";
@@ -8,7 +10,7 @@ import { Footer } from "./footer";
 export function InstitucionesList() {
   const [instituciones, setInstituciones] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const institutionsPerPage = 9;
+  const itemsPerPage = 9; // Cambiamos institutionsPerPage a itemsPerPage
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,8 +26,8 @@ export function InstitucionesList() {
     loadInstituciones();
   }, []);
 
-  const indexOfLastInstitution = currentPage * institutionsPerPage;
-  const indexOfFirstInstitution = indexOfLastInstitution - institutionsPerPage;
+  const indexOfLastInstitution = currentPage * itemsPerPage;
+  const indexOfFirstInstitution = indexOfLastInstitution - itemsPerPage;
   const currentInstitutions = instituciones.slice(
     indexOfFirstInstitution,
     indexOfLastInstitution
@@ -39,10 +41,7 @@ export function InstitucionesList() {
         <div className="grid gap-6 items-start grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3">
           {currentInstitutions.length > 0 ? (
             currentInstitutions.map((institucion) => (
-              <InstitucionCard
-                key={institucion.id}
-                institucion={institucion}
-              />
+              <InstitucionCard key={institucion.id} institucion={institucion} />
             ))
           ) : (
             <div className="col-span-full text-center text-white">
@@ -52,8 +51,8 @@ export function InstitucionesList() {
         </div>
         <div className="flex justify-between items-center mt-8">
           <Pagination
-            institutionsPerPage={institutionsPerPage}
-            totalInstitutions={instituciones.length}
+            itemsPerPage={itemsPerPage}
+            totalItems={instituciones.length}
             paginate={paginate}
             currentPage={currentPage}
           />
@@ -69,3 +68,5 @@ export function InstitucionesList() {
     </>
   );
 }
+
+export default InstitucionesList;

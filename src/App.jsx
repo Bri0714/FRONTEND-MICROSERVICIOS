@@ -3,7 +3,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
 import { InstitucionFormPage } from "./pages/InstitucionFormPage";
+import { RutasFormPage } from "./pages/RutasFormPage";
 import { InstitucionesPage } from "./pages/InstitucionesPage";
+import { RutasPage } from "./pages/RutasPage";
 import { Toaster } from "react-hot-toast";
 import { AdministracionColegios } from "./pages/AdministracionInstitucion";
 import { MenuPrincipal } from "./pages/MenuPrincipal";
@@ -123,22 +125,43 @@ function App() {
                         }
                     />
                     <Route
-                    path="/instituciones/:id/detalles"
-                    element={
-                        <PrivateRoute>
-                            <WithNavigation>
-                                <InstitucionDetail />
-                            </WithNavigation>
-                        </PrivateRoute>
-                    }
+                        path="/instituciones/:id/detalles"
+                        element={
+                            <PrivateRoute>
+                                <WithNavigation>
+                                    <InstitucionDetail />
+                                </WithNavigation>
+                            </PrivateRoute>
+                        }
                     />
-
+                    {/* Nueva ruta para InstitucionEstudiantesDetail */}
+                    <Route
+                        path="/instituciones/:institucionId/rutas/:rutaId/estudiantes"
+                        element={
+                            <PrivateRoute>
+                                <WithNavigation>
+                                    <InstitucionEstudiantesDetail />
+                                </WithNavigation>
+                            </PrivateRoute>
+                        }
+                    />
                     <Route
                         path="/instituciones-create"
                         element={
                             <PrivateRoute>
                                 <WithNavigation>
                                     <InstitucionFormPage />
+                                </WithNavigation>
+                            </PrivateRoute>
+                        }
+                    />
+                    {/* Ruta protegida para la creacion de Rutas */}
+                    <Route
+                        path="/rutas-create"
+                        element={
+                            <PrivateRoute>
+                                <WithNavigation>
+                                    <RutasFormPage />
                                 </WithNavigation>
                             </PrivateRoute>
                         }
@@ -160,6 +183,18 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <Perfil />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    {/*Modulo Menu Principal Rutas*/}
+                    <Route
+                        path="/rutas"
+                        element={
+                            <PrivateRoute>
+                                <WithNavigation>
+                                    <RutasPage />
+                                </WithNavigation>
                             </PrivateRoute>
                         }
                     />

@@ -1,9 +1,11 @@
+// src/components/Pagination.jsx
+
 import React from "react";
 
-const Pagination = ({ institutionsPerPage, totalInstitutions, paginate, currentPage }) => {
+const Pagination = ({ itemsPerPage, totalItems, paginate, currentPage }) => {
     const pageNumbers = [];
 
-    for (let i = 1; i <= Math.ceil(totalInstitutions / institutionsPerPage); i++) {
+    for (let i = 1; i <= Math.ceil(totalItems / itemsPerPage); i++) {
         pageNumbers.push(i);
     }
 

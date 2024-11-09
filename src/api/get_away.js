@@ -23,3 +23,6 @@ gatewayApi.interceptors.request.use(
 );
 
 export const getInstitucionWithRoutes = (institucionId) => gatewayApi.get(`/instituciones/${institucionId}/rutas/`);
+// Nueva función para obtener los estudiantes por institución y ruta
+export const getEstudiantesByInstitucionYRuta = (institucionId, rutaId) =>
+    gatewayApi.get(`/instituciones/${institucionId}/rutas/${rutaId}/estudiantes/`);

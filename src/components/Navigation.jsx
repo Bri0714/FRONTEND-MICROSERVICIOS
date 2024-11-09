@@ -14,32 +14,40 @@ export function Navigation() {
   };
 
   // Mapeo de rutas a títulos y botones
-  const routeInfo = {
-    "/menu-principal": {
+  const routeInfo = [
+    {
+      path: "/menu-principal",
       title: "Instituciones",
       createText: "Crear Institución",
       createLink: "/instituciones-create",
     },
-    "/instituciones": {
+    {
+      path: "/instituciones",
       title: "Colegios",
       createText: "Crear Colegio",
       createLink: "/instituciones-create",
     },
-    "/rutas": {
+    {
+      path: "/rutas",
       title: "Rutas",
       createText: "Crear Ruta",
       createLink: "/rutas-create",
     },
-    "/estudiantes": {
+    {
+      path: "/estudiantes",
       title: "Estudiantes",
       createText: "Crear Estudiante",
       createLink: "/estudiantes-create",
     },
     // Agrega más rutas si es necesario
-  };
+  ];
 
   const currentPath = location.pathname;
-  const { title, createText, createLink } = routeInfo[currentPath] || {
+
+  // Buscar la primera ruta cuyo path es un prefijo del currentPath
+  const matchedRoute = routeInfo.find(route => currentPath.startsWith(route.path));
+
+  const { title, createText, createLink } = matchedRoute || {
     title: "Colegios",
     createText: "Crear Colegio",
     createLink: "/instituciones-create",
@@ -71,4 +79,3 @@ export function Navigation() {
 }
 
 export default Navigation;
-
