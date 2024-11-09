@@ -14,7 +14,12 @@ import { Perfil } from "./pages/Perfil";
 import { InstitucionDetail } from "./pages/InstitucionDetail";
 import { InstitucionEstudiantesDetail } from "./pages/InstitucionEstudiantesDetail";
 import { AuthProvider, useAuth } from "./components/AuthContext";
-import axios from "axios"; // Agregar la importación de axios
+import axios from "axios";
+
+// Importar los componentes del loader
+import { LoaderProvider } from "./components/LoaderContext";
+import Spinner from "./components/Spinner";
+import RouteChangeHandler from "./components/RouteChangeHandler";
 
 // Establecer la URL base de tu API
 axios.defaults.baseURL = "http://localhost:8000/api/";
@@ -81,129 +86,133 @@ function PublicRoute({ children }) {
 function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
-                <Routes>
-                    {/* Ruta pública para login y registro */}
-                    <Route
-                        path="/"
-                        element={
-                            <PublicRoute>
-                                <IndexPage />
-                            </PublicRoute>
-                        }
-                    />
+            <LoaderProvider>
+                <BrowserRouter>
+                    <Spinner />
+                    <RouteChangeHandler />
+                    <Routes>
+                        {/* Ruta pública para login y registro */}
+                        <Route
+                            path="/"
+                            element={
+                                <PublicRoute>
+                                    <IndexPage />
+                                </PublicRoute>
+                            }
+                        />
 
-                    {/* Ruta protegida para el menú principal */}
-                    <Route
-                        path="/menu-principal"
-                        element={
-                            <PrivateRoute>
-                                <MenuPrincipal />
-                            </PrivateRoute>
-                        }
-                    />
+                        {/* Ruta protegida para el menú principal */}
+                        <Route
+                            path="/menu-principal"
+                            element={
+                                <PrivateRoute>
+                                    <MenuPrincipal />
+                                </PrivateRoute>
+                            }
+                        />
 
-                    {/* Rutas protegidas con navegación */}
-                    <Route
-                        path="/instituciones"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <InstitucionesPage />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/instituciones/:id"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <InstitucionFormPage />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/instituciones/:id/detalles"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <InstitucionDetail />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    {/* Nueva ruta para InstitucionEstudiantesDetail */}
-                    <Route
-                        path="/instituciones/:institucionId/rutas/:rutaId/estudiantes"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <InstitucionEstudiantesDetail />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/instituciones-create"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <InstitucionFormPage />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    {/* Ruta protegida para la creacion de Rutas */}
-                    <Route
-                        path="/rutas-create"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <RutasFormPage />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/administrar-colegios"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <AdministracionColegios />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
+                        {/* Rutas protegidas con navegación */}
+                        <Route
+                            path="/instituciones"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <InstitucionesPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/instituciones/:id"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <InstitucionFormPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/instituciones/:id/detalles"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <InstitucionDetail />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Nueva ruta para InstitucionEstudiantesDetail */}
+                        <Route
+                            path="/instituciones/:institucionId/rutas/:rutaId/estudiantes"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <InstitucionEstudiantesDetail />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/instituciones-create"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <InstitucionFormPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Ruta protegida para la creación de Rutas */}
+                        <Route
+                            path="/rutas-create"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <RutasFormPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/administrar-colegios"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <AdministracionColegios />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
 
-                    {/* Ruta protegida para el Perfil */}
-                    <Route
-                        path="/perfil"
-                        element={
-                            <PrivateRoute>
-                                <Perfil />
-                            </PrivateRoute>
-                        }
-                    />
+                        {/* Ruta protegida para el Perfil */}
+                        <Route
+                            path="/perfil"
+                            element={
+                                <PrivateRoute>
+                                    <Perfil />
+                                </PrivateRoute>
+                            }
+                        />
 
-                    {/*Modulo Menu Principal Rutas*/}
-                    <Route
-                        path="/rutas"
-                        element={
-                            <PrivateRoute>
-                                <WithNavigation>
-                                    <RutasPage />
-                                </WithNavigation>
-                            </PrivateRoute>
-                        }
-                    />
+                        {/* Módulo Menu Principal Rutas */}
+                        <Route
+                            path="/rutas"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <RutasPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
 
-                    {/* Redirecciona a "/" si la ruta no existe */}
-                    <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
-                <Toaster />
-            </BrowserRouter>
+                        {/* Redirecciona a "/" si la ruta no existe */}
+                        <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                    <Toaster />
+                </BrowserRouter>
+            </LoaderProvider>
         </AuthProvider>
     );
 }
