@@ -3,12 +3,15 @@ import { getAllInstituciones, deleteInstitucion } from "../api/instituciones.api
 import { useNavigate } from "react-router-dom";
 import { Footer } from "../components/footer";
 import { FaSearch } from "react-icons/fa";
+import  Pagination from "../components/Pagination";
 
 export function AdministracionColegios() {
     const [instituciones, setInstituciones] = useState([]);
-    const [filteredInstituciones, setFilteredInstituciones] = useState([]);
+    const [filteredData, setFilteredInstituciones] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         async function loadInstituciones() {
@@ -59,6 +62,14 @@ export function AdministracionColegios() {
         }
     };
 
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    // Calcular los índices para la paginación
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col pb-20">
             <h1 className="text-2xl font-bold mb-8 text-center">Administración de Colegios</h1>
@@ -87,8 +98,8 @@ export function AdministracionColegios() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredInstituciones.length > 0 ? (
-                            filteredInstituciones.map((institucion, index) => (
+                        {currentItems.length > 0 ? (
+                            currentItems.map((institucion, index) => (
                                 <tr key={institucion.id || index} className="transition-all duration-300 ease-in-out">
                                     <td className="py-2 border-b text-center text-black">{institucion.id || "ID no disponible"}</td>
                                     <td className="py-2 border-b text-center text-black">{institucion.institucion_nombre || "Nombre no disponible"}</td>
@@ -118,6 +129,15 @@ export function AdministracionColegios() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Paginador */}
+            <Pagination
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredData.length}
+                paginate={paginate}
+                currentPage={currentPage}
+            />
+
             <Footer />
         </div>
     );

@@ -8,6 +8,7 @@ import { InstitucionesPage } from "./pages/InstitucionesPage";
 import { RutasPage } from "./pages/RutasPage";
 import { Toaster } from "react-hot-toast";
 import { AdministracionColegios } from "./pages/AdministracionInstitucion";
+import { AdministracionRutas } from "./pages/Administracionruta";
 import { MenuPrincipal } from "./pages/MenuPrincipal";
 import { IndexPage } from "./pages/index";
 import { Perfil } from "./pages/Perfil";
@@ -20,6 +21,7 @@ import axios from "axios";
 import { LoaderProvider } from "./components/LoaderContext";
 import Spinner from "./components/Spinner";
 import RouteChangeHandler from "./components/RouteChangeHandler";
+import RutaActualizarForm from "./pages/RutaActualizarForm";
 
 // Establecer la URL base de tu API
 axios.defaults.baseURL = "http://localhost:8000/api/";
@@ -133,6 +135,16 @@ function App() {
                             }
                         />
                         <Route
+                            path="/rutas/:id/"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <RutaActualizarForm />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
                             path="/instituciones/:id/detalles"
                             element={
                                 <PrivateRoute>
@@ -174,6 +186,18 @@ function App() {
                                 </PrivateRoute>
                             }
                         />
+                        {/*Administracion de Rutas*/}
+                        <Route
+                            path="/administrar-rutas"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <AdministracionRutas />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Ruta protegida para la administración de colegios */}
                         <Route
                             path="/administrar-colegios"
                             element={

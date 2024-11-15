@@ -1,6 +1,9 @@
 // src/api/get_away.js
 
 import axios from "axios";
+import { updateVehiculo } from "./vehiculos";
+import { updateConductor } from "./conductores";
+import { updateRuta } from "./rutas.api";
 
 const URL = process.env.NODE_ENV === "production"
     ? import.meta.env.VITE_API_GATEWAY_URL
@@ -23,6 +26,14 @@ gatewayApi.interceptors.request.use(
 );
 
 export const getInstitucionWithRoutes = (institucionId) => gatewayApi.get(`/instituciones/${institucionId}/rutas/`);
+
 // Nueva función para obtener los estudiantes por institución y ruta
 export const getEstudiantesByInstitucionYRuta = (institucionId, rutaId) =>
     gatewayApi.get(`/instituciones/${institucionId}/rutas/${rutaId}/estudiantes/`);
+
+// Nueva función para obtener la información completa de una ruta, vehículo y conductor
+export const getRutaWithVehiculoConductor = (rutaId) => gatewayApi.get(`/rutas/${rutaId}/`);
+
+// Reutilizamos las funciones de update importadas de otros módulos
+export { updateRuta, updateVehiculo, updateConductor };
+

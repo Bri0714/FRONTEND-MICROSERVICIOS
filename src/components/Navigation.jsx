@@ -13,7 +13,6 @@ export function Navigation() {
     }
   };
 
-  // Mapeo de rutas a títulos y botones
   const routeInfo = [
     {
       path: "/menu-principal",
@@ -34,6 +33,12 @@ export function Navigation() {
       createLink: "/rutas-create",
     },
     {
+      path: "/administrar-rutas", // Nueva entrada añadida
+      title: "Rutas",
+      createText: "Crear Ruta",
+      createLink: "/rutas-create",
+    },
+    {
       path: "/estudiantes",
       title: "Estudiantes",
       createText: "Crear Estudiante",
@@ -41,6 +46,7 @@ export function Navigation() {
     },
     // Agrega más rutas si es necesario
   ];
+  
 
   const currentPath = location.pathname;
 
