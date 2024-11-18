@@ -153,7 +153,7 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                             {/* Enlaces a módulos no implementados que redirigen al menú principal */}
                             <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
                                 <Link
-                                    to="/menu-principal" // Redirige al menú principal
+                                    to="/rutas" // Redirige al menú principal
                                     className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"
                                         }`}
                                 >
@@ -163,7 +163,7 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                             </li>
                             <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
                                 <Link
-                                    to="/menu-principal" // Redirige al menú principal
+                                    to="/estudiantes" // Redirige al modulo estudiantes
                                     className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"
                                         }`}
                                 >

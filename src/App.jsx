@@ -4,8 +4,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Navigation } from "./components/Navigation";
 import { InstitucionFormPage } from "./pages/InstitucionFormPage";
 import { RutasFormPage } from "./pages/RutasFormPage";
+import { EstudiantesFormPage } from "./pages/EstudiantesFormPage";
 import { InstitucionesPage } from "./pages/InstitucionesPage";
 import { RutasPage } from "./pages/RutasPage";
+import { EstudiantesPage } from "./pages/EstudiantesPage";
 import { Toaster } from "react-hot-toast";
 import { AdministracionColegios } from "./pages/AdministracionInstitucion";
 import { AdministracionRutas } from "./pages/Administracionruta";
@@ -22,6 +24,8 @@ import { LoaderProvider } from "./components/LoaderContext";
 import Spinner from "./components/Spinner";
 import RouteChangeHandler from "./components/RouteChangeHandler";
 import RutaActualizarForm from "./pages/RutaActualizarForm";
+import EstudianteActualizarForm from "./pages/EstudianteActualizarForm";
+import VehiculosDetail from "./pages/VehiculosDetail";
 
 // Establecer la URL base de tu API
 axios.defaults.baseURL = "http://localhost:8000/api/";
@@ -145,11 +149,32 @@ function App() {
                             }
                         />
                         <Route
+                            path="/estudiantes/:id/"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <EstudianteActualizarForm />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+
                             path="/instituciones/:id/detalles"
                             element={
                                 <PrivateRoute>
                                     <WithNavigation>
                                         <InstitucionDetail />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/rutas/:id/detalles"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <VehiculosDetail />
                                     </WithNavigation>
                                 </PrivateRoute>
                             }
@@ -171,6 +196,16 @@ function App() {
                                 <PrivateRoute>
                                     <WithNavigation>
                                         <InstitucionFormPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/estudiantes-create"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <EstudiantesFormPage />
                                     </WithNavigation>
                                 </PrivateRoute>
                             }
@@ -226,6 +261,17 @@ function App() {
                                 <PrivateRoute>
                                     <WithNavigation>
                                         <RutasPage />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Módulo Menu Principal Estudiantes */}
+                        <Route
+                            path="/estudiantes"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <EstudiantesPage />
                                     </WithNavigation>
                                 </PrivateRoute>
                             }

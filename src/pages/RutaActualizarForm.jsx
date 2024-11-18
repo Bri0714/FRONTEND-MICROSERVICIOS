@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { updateRuta, getRuta } from "../api/rutas.api";
-import { updateVehiculo, getVehiculo } from "../api/vehiculos";
-import { updateConductor, getConductor } from "../api/conductores";
+import { updateRuta } from "../api/rutas.api";
+import { updateVehiculo, getAllVehiculos } from "../api/vehiculos";
+import { updateConductor, getAllConductores } from "../api/conductores";
 import { getAllInstituciones } from "../api/instituciones.api";
+import { getRutaWithVehiculoConductor } from "../api/get_away";
 import { toast } from "react-hot-toast";
 import { Footer } from "../components/footer";
 
@@ -27,7 +28,6 @@ export function RutaActualizarForm() {
     const [rutaId, setRutaId] = useState(null);
     const [vehiculoId, setVehiculoId] = useState(null);
     const [vehiculoPlaca, setVehiculoPlaca] = useState("");
-    const [monitoraId, setMonitoraId] = useState(null);
     const [conductorId, setConductorId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [showInstitucionesDropdown, setShowInstitucionesDropdown] = useState(false);
@@ -37,29 +37,77 @@ export function RutaActualizarForm() {
     const aceptaTerminosVehiculo = watch("acepta_terminos_vehiculo", false);
     const aceptaTerminosConductor = watch("acepta_terminos_conductor", false);
 
-    {/* Obtener los datos de las rutas */}
+    // Obtener los datos de la ruta completa
     useEffect(() => {
-        async function fetchRutaData() {
+        async function fetchRutaCompletaData() {
             try {
                 setIsLoading(true);
-                // Obtener datos de la ruta
-                const { data: rutaData } = await getRuta(id);
+                // Obtener datos de la ruta completa
+                const { data } = await getRutaWithVehiculoConductor(id);
+                console.log("Datos de Ruta Completa:", data);
 
-                // **Depuración: Verificar rutaData**
-                console.log("Datos de Ruta:", rutaData);
-
-                setRutaId(rutaData.id);
-                setValue("ruta_nombre", rutaData.ruta_nombre);
-                setValue("ruta_movil", rutaData.ruta_movil);
-                setValue("activa", rutaData.activa);
+                // Set ruta data
+                setRutaId(data.ruta.id);
+                setValue("ruta_nombre", data.ruta.nombre);
+                setValue("ruta_movil", data.ruta.codigo);
+                setValue("activa", data.ruta.estado);
 
                 // Obtener instituciones asociadas
                 const { data: institucionesData } = await getAllInstituciones();
                 setInstituciones(institucionesData);
                 const institucionesSeleccionadas = institucionesData.filter(inst =>
-                    rutaData.instituciones_ids.includes(inst.id)
+                    data.instituciones.includes(inst.institucion_nombre)
                 );
                 setSelectedInstituciones(institucionesSeleccionadas);
+
+                // Set vehiculo data
+                if (data.vehiculo && data.vehiculo.placa) {
+                    setVehiculoPlaca(data.vehiculo.placa);
+                    setValue("vehiculo_placa", data.vehiculo.placa);
+                    setValue("vehiculo_marca", data.vehiculo.marca);
+                    setValue("vehiculo_modelo", data.vehiculo.modelo);
+                    setValue("vehiculo_capacidad", data.vehiculo.capacidad);
+
+                    // Obtener vehiculoId
+                    const { data: vehiculosData } = await getAllVehiculos();
+                    const vehiculo = vehiculosData.find(v => v.vehiculo_placa === data.vehiculo.placa);
+                    if (vehiculo) {
+                        setVehiculoId(vehiculo.id);
+                    } else {
+                        console.error("Vehículo no encontrado");
+                    }
+                }
+
+                // Set monitora data
+                if (data.monitora && data.monitora.nombre_completo) {
+                    setValue("monitora_nombre_completo", data.monitora.nombre_completo);
+                    setValue("monitora_edad", data.monitora.edad);
+                    setValue("monitora_telefono", data.monitora.telefono);
+                }
+
+                // Set conductor data
+                if (data.conductor && data.conductor.nombre) {
+                    const nombreCompleto = data.conductor.nombre;
+                    const nombreApellido = nombreCompleto.split(' ');
+                    const nombre = nombreApellido[0];
+                    const apellido = nombreApellido.slice(1).join(' ');
+                    setValue("conductor_nombre", nombre);
+                    setValue("conductor_apellido", apellido);
+                    setValue("conductor_edad", data.conductor.edad);
+                    setValue("conductor_telefono", data.conductor.telefono);
+                    setValue("fecha_exp", data.conductor.fecha_expedicion);
+                    setValue("licencia_activa", data.conductor.estado);
+
+                    // Obtener conductorId
+                    const { data: conductoresData } = await getAllConductores();
+                    const conductor = conductoresData.find(c => c.telefono === data.conductor.telefono);
+                    if (conductor) {
+                        setConductorId(conductor.id);
+                    } else {
+                        console.error("Conductor no encontrado");
+                    }
+                }
+
             } catch (error) {
                 toast.error("Error al cargar los datos de la ruta", {
                     position: "bottom-right",
@@ -69,88 +117,7 @@ export function RutaActualizarForm() {
                 setIsLoading(false);
             }
         }
-        fetchRutaData();
-    }, [id, setValue]);
-
-    {/* Obtener los datos del vehículo junto con la monitora */}
-    useEffect(() => {
-        async function fetchVehiculoYMonitoraData() {
-            try {
-                setIsLoading(true);
-                // Obtener datos del vehículo
-                const { data: vehiculoData } = await getVehiculo(id);
-
-                // **Depuración: Verificar vehiculoData**
-                console.log("Datos de Vehículo:", vehiculoData);
-
-                setVehiculoId(vehiculoData.id);
-                setVehiculoPlaca(vehiculoData.vehiculo_placa); // Establecer la placa para el conductor
-                setValue("vehiculo_placa", vehiculoData.vehiculo_placa);
-                setValue("vehiculo_marca", vehiculoData.vehiculo_marca);
-                setValue("vehiculo_modelo", vehiculoData.vehiculo_modelo);
-                setValue("vehiculo_capacidad", vehiculoData.vehiculo_capacidad);
-                // Agrega más campos del vehículo según sea necesario
-
-                // Verificar y establecer datos de la monitora si existen
-                if (vehiculoData.monitora) {
-                    const monitoraData = vehiculoData.monitora;
-                    console.log("Datos de Monitora:", monitoraData);
-
-                    setMonitoraId(monitoraData.id);
-                    setValue("monitora_nombre_completo", monitoraData.nombre_completo);
-                    setValue("monitora_edad", monitoraData.edad);
-                    setValue("monitora_telefono", monitoraData.telefono);
-                    // Agrega más campos de la monitora según sea necesario
-                } else {
-                    console.warn("No hay datos de monitora asociados al vehículo.");
-                    // Opcional: Limpiar campos de monitora si no existen
-                    setValue("monitora_nombre_completo", "");
-                    setValue("monitora_edad", "");
-                    setValue("monitora_telefono", "");
-                    // Limpia más campos de la monitora según sea necesario
-                }
-            } catch (error) {
-                toast.error("Error al cargar los datos del vehículo y la monitora", {
-                    position: "bottom-right",
-                });
-                console.error(error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchVehiculoYMonitoraData();
-    }, [id, setValue]);
-
-    {/* Obtener los datos del conductor */}
-    useEffect(() => {
-        async function fetchConductorData() {
-            try {
-                setIsLoading(true);
-                // Obtener datos del conductor
-                const { data: conductorData } = await getConductor(id);
-
-                // **Depuración: Verificar conductorData**
-                console.log("Datos de Conductor:", conductorData);
-
-                setConductorId(conductorData.id);
-                setValue("conductor_nombre", conductorData.nombre);
-                setValue("conductor_apellido", conductorData.apellido);
-                setValue("conductor_edad", conductorData.edad);
-                setValue("conductor_telefono", conductorData.telefono);
-                setValue("fecha_exp", conductorData.fecha_exp);
-                setValue("fecha_expiracion", conductorData.fecha_expiracion);
-                setValue("licencia_activa", conductorData.licencia_activa);
-                // Agrega más campos según sea necesario
-            } catch (error) {
-                toast.error("Error al cargar los datos del conductor", {
-                    position: "bottom-right",
-                });
-                console.error(error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchConductorData();
+        fetchRutaCompletaData();
     }, [id, setValue]);
 
     const toggleInstitucionesDropdown = () => {
@@ -322,11 +289,10 @@ export function RutaActualizarForm() {
                             {/* Paso 1 */}
                             <div className="flex flex-col items-center w-1/4">
                                 <div
-                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${
-                                        currentStep >= 1
+                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${currentStep >= 1
                                             ? "bg-blue-500 border-blue-500"
                                             : "border-gray-300"
-                                    }`}
+                                        }`}
                                 >
                                     <span className="text-white font-bold">1</span>
                                 </div>
@@ -336,18 +302,16 @@ export function RutaActualizarForm() {
                             </div>
                             {/* Línea */}
                             <div
-                                className={`flex-auto border-t-2 mx-2 ${
-                                    currentStep > 1 ? "border-blue-500" : "border-gray-300"
-                                }`}
+                                className={`flex-auto border-t-2 mx-2 ${currentStep > 1 ? "border-blue-500" : "border-gray-300"
+                                    }`}
                             ></div>
                             {/* Paso 2 */}
                             <div className="flex flex-col items-center w-1/4">
                                 <div
-                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${
-                                        currentStep >= 2
+                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${currentStep >= 2
                                             ? "bg-blue-500 border-blue-500"
                                             : "border-gray-300"
-                                    }`}
+                                        }`}
                                 >
                                     <span className="text-white font-bold">2</span>
                                 </div>
@@ -357,18 +321,16 @@ export function RutaActualizarForm() {
                             </div>
                             {/* Línea */}
                             <div
-                                className={`flex-auto border-t-2 mx-2 ${
-                                    currentStep > 2 ? "border-blue-500" : "border-gray-300"
-                                }`}
+                                className={`flex-auto border-t-2 mx-2 ${currentStep > 2 ? "border-blue-500" : "border-gray-300"
+                                    }`}
                             ></div>
                             {/* Paso 3 */}
                             <div className="flex flex-col items-center w-1/4">
                                 <div
-                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${
-                                        currentStep >= 3
+                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${currentStep >= 3
                                             ? "bg-blue-500 border-blue-500"
                                             : "border-gray-300"
-                                    }`}
+                                        }`}
                                 >
                                     <span className="text-white font-bold">3</span>
                                 </div>
@@ -378,18 +340,16 @@ export function RutaActualizarForm() {
                             </div>
                             {/* Línea */}
                             <div
-                                className={`flex-auto border-t-2 mx-2 ${
-                                    currentStep > 3 ? "border-blue-500" : "border-gray-300"
-                                }`}
+                                className={`flex-auto border-t-2 mx-2 ${currentStep > 3 ? "border-blue-500" : "border-gray-300"
+                                    }`}
                             ></div>
                             {/* Paso 4 */}
                             <div className="flex flex-col items-center w-1/4">
                                 <div
-                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${
-                                        currentStep >= 4
+                                    className={`rounded-full h-10 w-10 flex items-center justify-center border-2 ${currentStep >= 4
                                             ? "bg-blue-500 border-blue-500"
                                             : "border-gray-300"
-                                    }`}
+                                        }`}
                                 >
                                     <span className="text-white font-bold">4</span>
                                 </div>
@@ -485,7 +445,7 @@ export function RutaActualizarForm() {
                                                         key={inst.id}
                                                         className="flex items-center bg-blue-500 text-white rounded-full px-3 py-1 mr-2 mb-2"
                                                     >
-                                                        <span>{inst.nombre}</span>
+                                                        <span>{inst.institucion_nombre}</span>
                                                         <button
                                                             type="button"
                                                             className="ml-2 focus:outline-none"
@@ -509,7 +469,7 @@ export function RutaActualizarForm() {
                                                     className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-black"
                                                     onClick={() => addInstitucion(institucion)}
                                                 >
-                                                    {institucion.nombre}
+                                                    {institucion.institucion_nombre}
                                                 </div>
                                             ))}
                                         </div>
@@ -538,11 +498,10 @@ export function RutaActualizarForm() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full transition-all duration-300 ease-in-out transform ${
-                                        isLoading
+                                    className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full transition-all duration-300 ease-in-out transform ${isLoading
                                             ? "opacity-50 cursor-not-allowed"
                                             : "hover:-translate-y-1 hover:scale-105"
-                                    } focus:outline-none focus:ring-4 focus:ring-blue-300`}
+                                        } focus:outline-none focus:ring-4 focus:ring-blue-300`}
                                 >
                                     {isLoading ? "Actualizando..." : "Actualizar Ruta"}
                                 </button>
@@ -828,7 +787,7 @@ export function RutaActualizarForm() {
                                 )}
                             </div>
 
-                            {/* Botón "Atrás" y "Guardar Vehículo y Monitora" */}
+                            {/* Botón "Atrás" y "Actualizar Vehículo y Monitora" */}
                             <div className="mt-6 flex justify-between">
                                 <button
                                     type="button"
@@ -840,15 +799,13 @@ export function RutaActualizarForm() {
                                 <button
                                     type="submit"
                                     disabled={isLoading || !aceptaTerminosVehiculo}
-                                    className={`${
-                                        aceptaTerminosVehiculo
+                                    className={`${aceptaTerminosVehiculo
                                             ? "bg-blue-500 hover:bg-blue-700"
                                             : "bg-gray-500 cursor-not-allowed"
-                                    } text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 ease-in-out transform ${
-                                        aceptaTerminosVehiculo
+                                        } text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 ease-in-out transform ${aceptaTerminosVehiculo
                                             ? "hover:-translate-y-1 hover:scale-105"
                                             : ""
-                                    } focus:outline-none focus:ring-4 focus:ring-blue-300`}
+                                        } focus:outline-none focus:ring-4 focus:ring-blue-300`}
                                 >
                                     {isLoading
                                         ? "Guardando..."
@@ -1082,7 +1039,7 @@ export function RutaActualizarForm() {
                                 )}
                             </div>
 
-                            {/* Botón "Atrás" y "Guardar Conductor" */}
+                            {/* Botón "Atrás" y "Actualizar Conductor" */}
                             <div className="mt-6 flex justify-between">
                                 <button
                                     type="button"
@@ -1094,15 +1051,13 @@ export function RutaActualizarForm() {
                                 <button
                                     type="submit"
                                     disabled={isLoading || !aceptaTerminosConductor}
-                                    className={`${
-                                        aceptaTerminosConductor
+                                    className={`${aceptaTerminosConductor
                                             ? "bg-blue-500 hover:bg-blue-700"
                                             : "bg-gray-500 cursor-not-allowed"
-                                    } text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 ease-in-out transform ${
-                                        aceptaTerminosConductor
+                                        } text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 ease-in-out transform ${aceptaTerminosConductor
                                             ? "hover:-translate-y-1 hover:scale-105"
                                             : ""
-                                    } focus:outline-none focus:ring-4 focus:ring-blue-300`}
+                                        } focus:outline-none focus:ring-4 focus:ring-blue-300`}
                                 >
                                     {isLoading ? "Guardando..." : "Actualizar Conductor"}
                                 </button>
@@ -1118,4 +1073,3 @@ export function RutaActualizarForm() {
 }
 
 export default RutaActualizarForm;
-
