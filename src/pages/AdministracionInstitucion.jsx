@@ -3,7 +3,8 @@ import { getAllInstituciones, deleteInstitucion } from "../api/instituciones.api
 import { useNavigate } from "react-router-dom";
 import { Footer } from "../components/footer";
 import { FaSearch } from "react-icons/fa";
-import  Pagination from "../components/Pagination";
+import Pagination from "../components/Pagination";
+import Swal from "sweetalert2";
 
 export function AdministracionColegios() {
     const [instituciones, setInstituciones] = useState([]);
@@ -50,17 +51,60 @@ export function AdministracionColegios() {
         }
     };
 
-    // Eliminar una institución
     const handleDelete = async (id) => {
-        try {
-            await deleteInstitucion(id);
-            const updatedInstituciones = instituciones.filter((institucion) => institucion.id !== id);
-            setInstituciones(updatedInstituciones);
-            setFilteredInstituciones(updatedInstituciones);
-        } catch (error) {
-            console.error("Error al eliminar la institución:", error);
-        }
+        Swal.fire({
+            title: '<h2 class="text-blue-500 font-bold">Aviso</h2>',
+            html: '<p class="text-gray-700">¿Estás seguro de eliminar esta institución? La eliminarás de cualquier servicio asociado a esta, tanto estudiantes como rutas.</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-2',
+                cancelButton: 'bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mx-2',
+                popup: 'bg-blue-50 p-6 rounded-lg shadow-lg',
+            },
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    // Llamada a la API para eliminar la institución
+                    await deleteInstitucion(id);
+
+                    // Actualizar el estado de instituciones después de la eliminación
+                    const updatedInstituciones = instituciones.filter((institucion) => institucion.id !== id);
+                    setInstituciones(updatedInstituciones);
+                    setFilteredInstituciones(updatedInstituciones);
+
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: '<h2 class="text-green-500 font-bold">Eliminado</h2>',
+                        html: '<p class="text-gray-700">La institución y los elementos asociados han sido eliminados exitosamente.</p>',
+                        icon: 'success',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded',
+                            popup: 'bg-green-50 p-6 rounded-lg shadow-lg',
+                        },
+                    });
+                } catch (error) {
+                    console.error("Error al eliminar la institución:", error);
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        title: '<h2 class="text-red-500 font-bold">Error</h2>',
+                        html: '<p class="text-gray-700">Hubo un error al intentar eliminar la institución. Por favor, inténtalo de nuevo.</p>',
+                        icon: 'error',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded',
+                            popup: 'bg-red-50 p-6 rounded-lg shadow-lg',
+                        },
+                    });
+                }
+            }
+        });
     };
+
 
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);

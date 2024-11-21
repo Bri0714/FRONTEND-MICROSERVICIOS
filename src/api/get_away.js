@@ -34,6 +34,10 @@ export const getEstudiantesByInstitucionYRuta = (institucionId, rutaId) =>
 // Nueva función para obtener la información completa de una ruta, vehículo y conductor
 export const getRutaWithVehiculoConductor = (rutaId) => gatewayApi.get(`/rutas/${rutaId}/`);
 
+// Nueva función para obtener la información de un vehículo y sus documentos legales
+export const getVehiculoDetalles = (vehiculoId) =>
+    gatewayApi.get(`/vehiculos/${vehiculoId}/`);
+
 // Reutilizamos las funciones de update importadas de otros módulos
 export { updateRuta, updateVehiculo, updateConductor };
 

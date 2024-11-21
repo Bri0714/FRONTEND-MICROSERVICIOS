@@ -140,7 +140,7 @@ export function EstudiantesList() {
     const handleDelete = async (id, estudiante) => {
         Swal.fire({
             title: '<h2 class="text-blue-500 font-bold">Aviso</h2>',
-            html: `<p class="text-gray-700">¿Estás seguro de eliminar al estudiante <strong>${estudiante.estudiante_nombre} ${estudiante.estudiante_apellido}</strong> perteneciente a la institución <strong>${estudiante.institucion.nombre}</strong>, con ruta <strong>${estudiante.ruta.nombre}</strong> y vehículo de placa <strong>${estudiante.vehiculo_placa}</strong>?</p>`,
+            html: `<p class="text-gray-700">¿Estás seguro de eliminar al estudiante <strong>${estudiante.estudiante_nombre} ${estudiante.estudiante_apellido}</strong> perteneciente a la institución <strong>${estudiante.institucion.nombre}</strong>, de la <strong>${estudiante.ruta.nombre}</strong> vehículo de placa <strong>${estudiante.vehiculo_placa}</strong>?</p>`,
             icon: "warning",
             showCancelButton: true,
             buttonsStyling: false,
@@ -350,7 +350,7 @@ export function EstudiantesList() {
                                         </td>
                                         <td className="py-2 border-b text-center">
                                             <button
-                                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                                className="bg-lime-800 hover:bg-lime-400 text-white font-bold py-2 px-4 rounded"
                                                 onClick={() => handleRevisionPago(estudiante.id)}
                                             >
                                                 <FiDollarSign className="inline-block text-xl" />

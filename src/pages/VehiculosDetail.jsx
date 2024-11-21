@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Footer } from "../components/footer";
 import { Navigation } from "../components/Navigation";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getRutaWithVehiculoConductor } from "../api/get_away";
 import axios from "axios";
 
@@ -12,6 +12,7 @@ export function VehiculoDetail() {
     const [rutaData, setRutaData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     // Función para ajustar la URL de las imágenes
     function getAccessibleImageUrl(imageUrl) {
@@ -111,9 +112,13 @@ export function VehiculoDetail() {
                         </div>
                         {/* Botones para Documentación y Ubicación en vivo */}
                         <div className="flex flex-col md:flex-row justify-center items-center mt-10 space-y-4 md:space-y-0 md:space-x-8">
-                            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                onClick={() => navigate(`/vehiculos/${rutaData.vehiculo.id}`)}
+                            >
                                 Documentación
                             </button>
+
                             <button
                                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                                 onClick={handleGpsLocation}

@@ -14,6 +14,9 @@ import { useAuth } from "./AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import Notifications from "./Notifications"; // Importar el componente de Notificaciones
 import { getAllConductores } from "../api/conductores"; // Importar la API de conductores
+import { getAllInstituciones } from "../api/instituciones.api";
+import { getAllRutas } from "../api/rutas.api"; // Importar la API de rutas
+import Swal from 'sweetalert2'; // Importar SweetAlert para mensajes
 
 export function Sidebar({ isOpen, toggleSidebar }) {
     const { logout } = useAuth();
@@ -23,6 +26,9 @@ export function Sidebar({ isOpen, toggleSidebar }) {
     const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const notificationsPerPage = 7;
+    //estado para instituciones y rutas
+    const [instituciones, setInstituciones] = useState([]);
+    const [rutas, setRutas] = useState([]);
 
     const handleLogout = async () => {
         await logout();
@@ -34,19 +40,39 @@ export function Sidebar({ isOpen, toggleSidebar }) {
         setIsNotificationsPanelOpen(!isNotificationsPanelOpen);
     };
 
-    // Agregar una notificación
+    // Agregar una notificación para conductores
     const addNotification = (conductor) => {
         setNotifications((prevNotifications) => {
             // Evitar duplicados
-            const exists = prevNotifications.find((notif) => notif.id === conductor.id);
+            const exists = prevNotifications.find((notif) => notif.id === conductor.id && notif.type === 'conductor');
             if (exists) return prevNotifications;
             return [
                 ...prevNotifications,
                 {
                     id: conductor.id,
+                    type: 'conductor',
                     nombre: `${conductor.nombre} ${conductor.apellido}`,
                     fecha: conductor.fecha_expiracion,
                     mensaje: `El conductor ${conductor.nombre} ${conductor.apellido} tiene vencida la licencia de conducción.`,
+                },
+            ];
+        });
+    };
+
+    // Agregar una notificación para rutas
+    const addRutaNotification = (ruta) => {
+        setNotifications((prevNotifications) => {
+            // Evitar duplicados
+            const exists = prevNotifications.find((notif) => notif.id === ruta.id && notif.type === 'ruta');
+            if (exists) return prevNotifications;
+            return [
+                ...prevNotifications,
+                {
+                    id: ruta.id,
+                    type: 'ruta',
+                    nombre: ruta.ruta_nombre,
+                    fecha: ruta.fecha_actualizacion || 'N/A', // Ajusta según los campos disponibles
+                    mensaje: `La ruta ${ruta.ruta_nombre} está inactiva.`,
                 },
             ];
         });
@@ -85,10 +111,32 @@ export function Sidebar({ isOpen, toggleSidebar }) {
         fetchConductores();
     }, []);
 
+    // Obtener rutas inactivas al montar el componente
+    useEffect(() => {
+        const fetchRutas = async () => {
+            try {
+                const rutasRes = await getAllRutas();
+                const rutasData = rutasRes.data;
+
+                rutasData.forEach((ruta) => {
+                    // Si la ruta no está activa, agregar una notificación
+                    if (!ruta.activa) {
+                        addRutaNotification(ruta);
+                    }
+                });
+            } catch (error) {
+                console.error("Error al obtener rutas:", error);
+            }
+        };
+
+        fetchRutas();
+    }, []);
+
     // Polling para actualizar notificaciones cada 60 segundos
     useEffect(() => {
         const interval = setInterval(async () => {
             try {
+                // Actualizar conductores
                 const conductoresRes = await getAllConductores();
                 const conductoresData = conductoresRes.data;
 
@@ -97,19 +145,98 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                         addNotification(conductor);
                     } else {
                         // Si el conductor está activo, eliminar la notificación si existe
-                        removeNotification(conductor.id);
+                        setNotifications((prevNotifications) =>
+                            prevNotifications.filter(
+                                (notif) => !(notif.id === conductor.id && notif.type === 'conductor')
+                            )
+                        );
+                    }
+                });
+
+                // Actualizar rutas
+                const rutasRes = await getAllRutas();
+                const rutasData = rutasRes.data;
+
+                rutasData.forEach((ruta) => {
+                    if (!ruta.activa) {
+                        addRutaNotification(ruta);
+                    } else {
+                        // Si la ruta está activa, eliminar la notificación si existe
+                        setNotifications((prevNotifications) =>
+                            prevNotifications.filter(
+                                (notif) => !(notif.id === ruta.id && notif.type === 'ruta')
+                            )
+                        );
                     }
                 });
             } catch (error) {
-                console.error("Error al obtener conductores:", error);
+                console.error("Error al obtener datos:", error);
             }
         }, 60000); // Verificar cada 60 segundos
 
         return () => clearInterval(interval);
-    }, [notifications]);
+    }, []);
 
     // Manejar el cambio de página
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+        // Fetch de Instituciones y Rutas
+        useEffect(() => {
+            const fetchData = async () => {
+                try {
+                    const [institucionesRes, rutasRes] = await Promise.all([
+                        getAllInstituciones(),
+                        getAllRutas(),
+                    ]);
+                    setInstituciones(institucionesRes.data);
+                    setRutas(rutasRes.data);
+                } catch (error) {
+                    console.error("Error al obtener instituciones o rutas:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un error al cargar los datos. Por favor, inténtalo de nuevo más tarde.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        buttonsStyling: false,
+                        customClass: {
+                            confirmButton: 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded',
+                            popup: 'bg-red-50 p-6 rounded-lg shadow-lg',
+                        },
+                    });
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+    
+            fetchData();
+        }, []);
+
+    // Determinar si los módulos están habilitados
+    const rutasEnabled = instituciones.length > 0;
+    const estudiantesEnabled = rutas.length > 0 && rutasEnabled;
+
+    // Manejar el click en módulos bloqueados
+    const handleModuleClick = (moduleName) => {
+        let message = "";
+        if (moduleName === "Rutas") {
+            message = "Debes crear al menos una institución antes de acceder a Rutas.";
+        } else if (moduleName === "Estudiantes") {
+            message = "Debes crear al menos una ruta antes de acceder a Estudiantes.";
+        }
+
+        Swal.fire({
+            title: 'Acceso Restringido',
+            text: message,
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded',
+                popup: 'bg-blue-50 p-6 rounded-lg shadow-lg',
+            },
+        });
+    };
+
 
     return (
         <>
@@ -150,27 +277,51 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                                     {isOpen && <span className="font-poppins">Colegios</span>}
                                 </Link>
                             </li>
-                            {/* Enlaces a módulos no implementados que redirigen al menú principal */}
-                            <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
-                                <Link
-                                    to="/rutas" // Redirige al menú principal
-                                    className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"
-                                        }`}
+                            {/* Enlaces a módulos */}
+                            {rutasEnabled ? (
+                                <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
+                                    <Link
+                                        to="/rutas"
+                                        className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"}`}
+                                    >
+                                        <FaRoute size={20} />
+                                        {isOpen && <span className="font-poppins">Rutas</span>}
+                                    </Link>
+                                </li>
+                            ) : (
+                                <li
+                                    className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out cursor-not-allowed opacity-50"
+                                    onClick={() => handleModuleClick("Rutas")}
                                 >
-                                    <FaRoute size={20} />
-                                    {isOpen && <span className="font-poppins">Rutas</span>}
-                                </Link>
-                            </li>
-                            <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
-                                <Link
-                                    to="/estudiantes" // Redirige al modulo estudiantes
-                                    className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"
-                                        }`}
+                                    <div className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"}`}>
+                                        <FaRoute size={20} />
+                                        {isOpen && <span className="font-poppins">Rutas</span>}
+                                    </div>
+                                </li>
+                            )}
+
+                            {estudiantesEnabled ? (
+                                <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
+                                    <Link
+                                        to="/estudiantes"
+                                        className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"}`}
+                                    >
+                                        <FaUserGraduate size={20} />
+                                        {isOpen && <span className="font-poppins">Estudiantes</span>}
+                                    </Link>
+                                </li>
+                            ) : (
+                                <li
+                                    className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out cursor-not-allowed opacity-50"
+                                    onClick={() => handleModuleClick("Estudiantes")}
                                 >
-                                    <FaUserGraduate size={20} />
-                                    {isOpen && <span className="font-poppins">Estudiantes</span>}
-                                </Link>
-                            </li>
+                                    <div className={`flex items-center gap-4 ${isOpen ? "justify-start" : "justify-center"}`}>
+                                        <FaUserGraduate size={20} />
+                                        {isOpen && <span className="font-poppins">Estudiantes</span>}
+                                    </div>
+                                </li>
+                            )}
+
                             {/* Enlace al Perfil */}
                             <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out">
                                 <Link
@@ -182,7 +333,6 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                                     {isOpen && <span className="font-poppins">Perfil</span>}
                                 </Link>
                             </li>
-                            {/* Botón de Notificaciones */}
                             {/* Botón de Notificaciones */}
                             <li className="hover:bg-[#14212b] px-4 py-2 rounded transition-all duration-300 ease-in-out relative">
                                 <button
@@ -231,7 +381,7 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                 paginate={paginate}
                 notificationsPerPage={notificationsPerPage}
                 totalPages={Math.ceil(notifications.length / notificationsPerPage)}
-                toggleNotificationsPanel={toggleNotificationsPanel} // Pasar la funció
+                toggleNotificationsPanel={toggleNotificationsPanel} // Pasar la función
             />
         </>
     );

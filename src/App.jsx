@@ -26,6 +26,9 @@ import RouteChangeHandler from "./components/RouteChangeHandler";
 import RutaActualizarForm from "./pages/RutaActualizarForm";
 import EstudianteActualizarForm from "./pages/EstudianteActualizarForm";
 import VehiculosDetail from "./pages/VehiculosDetail";
+import VehiculoDocumentos from "./pages/VehiculoDocumentos";
+import DocumentoVehiculo from "./pages/DocumentoVehiculo";
+import ResetPasswordForm from "./components/ResetPasswordForm";
 
 // Establecer la URL base de tu API
 axios.defaults.baseURL = "http://localhost:8000/api/";
@@ -276,7 +279,36 @@ function App() {
                                 </PrivateRoute>
                             }
                         />
-
+                        {/* Ruta para ver los detalles de un vehículo */}
+                        <Route
+                            path="/vehiculos/:id"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <VehiculoDocumentos />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/vehiculo/:vehiculoId/documento/:docType"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <DocumentoVehiculo />
+                                    </WithNavigation>
+                                </PrivateRoute>
+                            }
+                        />
+                        {/* Ruta para restablecer la contraseña */}
+                        <Route
+                            path="/reset-password"
+                            element={
+                                <PublicRoute>
+                                    <ResetPasswordForm />
+                                </PublicRoute>
+                            }
+                        />
                         {/* Redirecciona a "/" si la ruta no existe */}
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>

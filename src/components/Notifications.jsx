@@ -55,14 +55,26 @@ const Notifications = ({
                         <ul className="space-y-4">
                             {currentNotifications.map((notif) => (
                                 <li
-                                    key={notif.id}
-                                    className="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors duration-200"
+                                    key={`${notif.type}-${notif.id}`}
+                                    className={`p-4 rounded-lg cursor-pointer transition-colors duration-200 ${notif.type === 'conductor'
+                                            ? 'bg-gray-100 hover:bg-gray-200'
+                                            : 'bg-yellow-100 hover:bg-yellow-200'
+                                        }`}
                                     onClick={() => removeNotification(notif.id)}
                                 >
-                                    <p className="text-sm text-gray-700">
-                                        El Conductor <strong>{notif.nombre}</strong>, tiene vencida la licencia de conducción.
+                                    <p className={`text-sm ${notif.type === 'conductor' ? 'text-gray-700' : 'text-black'
+                                        }`}>
+                                        {notif.type === 'conductor' ? (
+                                            <>
+                                                El conductor <strong>{notif.nombre}</strong> tiene vencida la licencia de conducción.
+                                                <p className="text-xs text-gray-500">Fecha: {notif.fecha}</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                La ruta <strong>{notif.nombre}</strong> está inactiva, revisa los documentos asociados a este vehiculo.
+                                            </>
+                                        )}
                                     </p>
-                                    <p className="text-xs text-gray-500">Fecha de expiración: {notif.fecha}</p>
                                 </li>
                             ))}
                         </ul>
