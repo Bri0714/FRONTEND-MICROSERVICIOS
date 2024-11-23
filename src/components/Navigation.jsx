@@ -1,7 +1,7 @@
 // src/components/Navigation.js
 
 import React from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, matchPath } from "react-router-dom"; // Import matchPath
 
 export function Navigation() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export function Navigation() {
       createLink: "/rutas-create",
     },
     {
-      path: "/administrar-rutas", // Nueva entrada añadida
+      path: "/administrar-rutas",
       title: "Rutas",
       createText: "Crear Ruta",
       createLink: "/rutas-create",
@@ -44,14 +44,33 @@ export function Navigation() {
       createText: "Crear Estudiante",
       createLink: "/estudiantes-create",
     },
-    // Agrega más rutas si es necesario
+    // Entries for VehiculoDocumentos and DocumentoVehiculo
+    {
+      path: "/vehiculos/:id",
+      title: "Rutas",
+      createText: "Crear Ruta",
+      createLink: "/rutas-create",
+    },
+    {
+      path: "/vehiculo/:vehiculoId/documento/:docType",
+      title: "Rutas",
+      createText: "Crear Ruta",
+      createLink: "/rutas-create",
+    },
+    {
+      path: "/estudiantes-create",
+      title: "Estudiantes",
+      createText: "Crear Estudiante",
+      createLink: "/estudiantes-create",
+    }
   ];
-  
 
   const currentPath = location.pathname;
 
-  // Buscar la primera ruta cuyo path es un prefijo del currentPath
-  const matchedRoute = routeInfo.find(route => currentPath.startsWith(route.path));
+  // Use matchPath to match dynamic routes
+  const matchedRoute = routeInfo.find(route =>
+    matchPath({ path: route.path, end: false }, currentPath)
+  );
 
   const { title, createText, createLink } = matchedRoute || {
     title: "Colegios",
@@ -68,8 +87,8 @@ export function Navigation() {
         >
           Atrás
         </button>
-        <Link 
-          to="/menu-principal" 
+        <Link
+          to="/menu-principal"
           className="text-white font-extrabold text-2xl md:text-3xl hover:text-gray-200 transition-colors duration-300 text-center"
         >
           {title}

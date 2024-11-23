@@ -16,6 +16,7 @@ import Notifications from "./Notifications"; // Importar el componente de Notifi
 import { getAllConductores } from "../api/conductores"; // Importar la API de conductores
 import { getAllInstituciones } from "../api/instituciones.api";
 import { getAllRutas } from "../api/rutas.api"; // Importar la API de rutas
+import { getAllEstudiantes } from "../api/estudiantes"; // Importar la API de estudiantes
 import Swal from 'sweetalert2'; // Importar SweetAlert para mensajes
 
 export function Sidebar({ isOpen, toggleSidebar }) {
@@ -78,6 +79,28 @@ export function Sidebar({ isOpen, toggleSidebar }) {
         });
     };
 
+    // Agregar una notificación para estudiantes
+    const addEstudianteNotification = (estudiante) => {
+        setNotifications((prevNotifications) => {
+            // Evitar duplicados
+            const exists = prevNotifications.find(
+                (notif) => notif.id === estudiante.id && notif.type === 'estudiante'
+            );
+            if (exists) return prevNotifications;
+            return [
+                ...prevNotifications,
+                {
+                    id: estudiante.id,
+                    type: 'estudiante',
+                    nombre: `${estudiante.estudiante_nombre} ${estudiante.estudiante_apellido}`,
+                    fecha: estudiante.estudiante_fecha_ingreso_ruta || 'N/A',
+                    mensaje: `El estudiante ${estudiante.estudiante_nombre} ${estudiante.estudiante_apellido} se encuentra inactivo por falta de pago. Dirígete al módulo de pagos.`,
+                },
+            ];
+        });
+    };
+
+
     // Eliminar una notificación
     const removeNotification = (id) => {
         setNotifications((prevNotifications) =>
@@ -132,6 +155,27 @@ export function Sidebar({ isOpen, toggleSidebar }) {
         fetchRutas();
     }, []);
 
+    // Obtener estudiantes inactivos al montar el componente
+    useEffect(() => {
+        const fetchEstudiantes = async () => {
+            try {
+                const estudiantesRes = await getAllEstudiantes();
+                const estudiantesData = estudiantesRes.data;
+
+                estudiantesData.forEach((estudiante) => {
+                    if (!estudiante.estudiante_estado) {
+                        // Si el estudiante está inactivo, agregar una notificación
+                        addEstudianteNotification(estudiante);
+                    }
+                });
+            } catch (error) {
+                console.error("Error al obtener estudiantes:", error);
+            }
+        };
+
+        fetchEstudiantes();
+    }, []);
+
     // Polling para actualizar notificaciones cada 60 segundos
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -169,6 +213,24 @@ export function Sidebar({ isOpen, toggleSidebar }) {
                         );
                     }
                 });
+
+                // Actualizar estudiantes
+                const estudiantesRes = await getAllEstudiantes();
+                const estudiantesData = estudiantesRes.data;
+
+                estudiantesData.forEach((estudiante) => {
+                    if (!estudiante.estudiante_estado) {
+                        addEstudianteNotification(estudiante);
+                    } else {
+                        // Si el estudiante está activo, eliminar la notificación si existe
+                        setNotifications((prevNotifications) =>
+                            prevNotifications.filter(
+                                (notif) => !(notif.id === estudiante.id && notif.type === 'estudiante')
+                            )
+                        );
+                    }
+                });
+
             } catch (error) {
                 console.error("Error al obtener datos:", error);
             }
@@ -180,36 +242,36 @@ export function Sidebar({ isOpen, toggleSidebar }) {
     // Manejar el cambio de página
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-        // Fetch de Instituciones y Rutas
-        useEffect(() => {
-            const fetchData = async () => {
-                try {
-                    const [institucionesRes, rutasRes] = await Promise.all([
-                        getAllInstituciones(),
-                        getAllRutas(),
-                    ]);
-                    setInstituciones(institucionesRes.data);
-                    setRutas(rutasRes.data);
-                } catch (error) {
-                    console.error("Error al obtener instituciones o rutas:", error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Hubo un error al cargar los datos. Por favor, inténtalo de nuevo más tarde.',
-                        icon: 'error',
-                        confirmButtonText: 'Aceptar',
-                        buttonsStyling: false,
-                        customClass: {
-                            confirmButton: 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded',
-                            popup: 'bg-red-50 p-6 rounded-lg shadow-lg',
-                        },
-                    });
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-    
-            fetchData();
-        }, []);
+    // Fetch de Instituciones y Rutas
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [institucionesRes, rutasRes] = await Promise.all([
+                    getAllInstituciones(),
+                    getAllRutas(),
+                ]);
+                setInstituciones(institucionesRes.data);
+                setRutas(rutasRes.data);
+            } catch (error) {
+                console.error("Error al obtener instituciones o rutas:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un error al cargar los datos. Por favor, inténtalo de nuevo más tarde.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded',
+                        popup: 'bg-red-50 p-6 rounded-lg shadow-lg',
+                    },
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // Determinar si los módulos están habilitados
     const rutasEnabled = instituciones.length > 0;

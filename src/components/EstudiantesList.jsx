@@ -351,7 +351,7 @@ export function EstudiantesList() {
                                         <td className="py-2 border-b text-center">
                                             <button
                                                 className="bg-lime-800 hover:bg-lime-400 text-white font-bold py-2 px-4 rounded"
-                                                onClick={() => handleRevisionPago(estudiante.id)}
+                                                onClick={() => navigate(`/estudiantes/${estudiante.id}/detalles`)}
                                             >
                                                 <FiDollarSign className="inline-block text-xl" />
                                             </button>

@@ -29,6 +29,7 @@ import VehiculosDetail from "./pages/VehiculosDetail";
 import VehiculoDocumentos from "./pages/VehiculoDocumentos";
 import DocumentoVehiculo from "./pages/DocumentoVehiculo";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import EstudianteDetailPagos from "./pages/EstudianteDetailPagos";
 
 // Establecer la URL base de tu API
 axios.defaults.baseURL = "http://localhost:8000/api/";
@@ -307,6 +308,17 @@ function App() {
                                 <PublicRoute>
                                     <ResetPasswordForm />
                                 </PublicRoute>
+                            }
+                        />
+                        {/* Ruta para ver los detalles del estudiante y sus pagos */}
+                        <Route
+                            path="/estudiantes/:id/detalles"
+                            element={
+                                <PrivateRoute>
+                                    <WithNavigation>
+                                        <EstudianteDetailPagos />
+                                    </WithNavigation>
+                                </PrivateRoute>
                             }
                         />
                         {/* Redirecciona a "/" si la ruta no existe */}

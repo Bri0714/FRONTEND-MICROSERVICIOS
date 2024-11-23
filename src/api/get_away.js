@@ -38,6 +38,9 @@ export const getRutaWithVehiculoConductor = (rutaId) => gatewayApi.get(`/rutas/$
 export const getVehiculoDetalles = (vehiculoId) =>
     gatewayApi.get(`/vehiculos/${vehiculoId}/`);
 
+// **Nueva función para obtener la información del estudiante y sus pagos**
+export const getEstudianteDetalles = (estudianteId) =>
+    gatewayApi.get(`/estudiantes/${estudianteId}/`);
+
 // Reutilizamos las funciones de update importadas de otros módulos
 export { updateRuta, updateVehiculo, updateConductor };
-
